@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | Fund Master{% endblock %}
+
+{% block content %}
+<h1 class="dashboard-title">Overview</h1>
+
+<div class="card-grid">
+    <div class="dash-card glow-blue">
+        <h3>Total Balance</h3>
+        <p>₹ {{ total_balance }}</p>
+    </div>
+    <div class="dash-card glow-green">
+        <h3>Total Income</h3>
+        <p>₹ {{ total_income }}</p>
+    </div>
+    <div class="dash-card glow-red">
+        <h3>Total Expense</h3>
+        <p>₹ {{ total_expense }}</p>
+    </div>
+</div>
+
+<a href="/export/pdf" style="
+    display: inline-block;
+    margin-top: 30px;
+    padding: 13px 28px;
+    background: linear-gradient(135deg, #00f2ff, #00c6ff);
+    color: #002b36;
+    font-weight: bold;
+    font-size: 15px;
+    border-radius: 12px;
+    text-decoration: none;
+    box-shadow: 0 0 25px rgba(0,242,255,0.5);">
+    ⬇ Export Financial Report (PDF)
+</a>
+
+{% endblock %}

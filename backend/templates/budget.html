@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Budget Planner | Fund Master{% endblock %}
+
+{% block content %}
+<h1 class="dashboard-title">Budget Planner</h1>
+
+<div class="income-container">
+
+    <!-- ADD BUDGET -->
+    <div class="income-card glow-blue">
+        <h3>Set Category Budget</h3>
+        <form method="POST" action="/budget">
+            <input type="text" name="category" placeholder="Category (e.g. Food, Rent)" required>
+            <input type="text" name="limit_amount" placeholder="Monthly Limit (Rs.)" required>
+            <label style="font-size:13px;color:#b0bec5;display:block;margin-bottom:5px;">Month</label>
+            <input type="month" name="month" value="{{ current_month }}"
+                style="width:100%;padding:12px;margin-bottom:12px;border-radius:10px;
+                border:none;background:#0d1b22;color:white;font-size:14px;">
+            <button type="submit">Set Budget</button>
+        </form>
+    </div>
+
+    <!-- BUDGET LIST -->
+    <div class="income-card glow-green">
+        <h3>This Month — {{ current_month }}</h3>
+
+        {% if budget_data %}
+            {% for b in budget_data %}
+            <div style="margin-bottom:20px;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                    <span style="font-weight:600;color:#e2e8f0;">{{ b.category }}</span>
+                    <span style="font-size:13px;color:#b0bec5;">
+                        Rs. {{ "%.0f"|format(b.spent) }} / Rs. {{ "%.0f"|format(b.limit) }}
+                    </span>
+                </div>
+
+                <div style="background:rgba(255,255,255,0.1);border-radius:20px;height:12px;overflow:hidden;">
+                    <div style="height:100%;border-radius:20px;width:{{ b.percent }}%;
+                        background:{% if b.status == 'danger' %}linear-gradient(90deg,#ff5252,#ff1744)
+                                   {% elif b.status == 'warning' %}linear-gradient(90deg,#ffd740,#ffa000)
+                                   {% else %}linear-gradient(90deg,#00ffa6,#00f2ff){% endif %};
+                        transition:width 0.5s ease;">
+                    </div>
+                </div>
+
+                <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:12px;">
+                    <span style="color:{% if b.status == 'danger' %}#ff5252{% elif b.status == 'warning' %}#ffd740{% else %}#00ffa6{% endif %};">
+                        {{ b.percent }}% used
+                    </span>
+                    <span style="color:#b0bec5;">Rs. {{ "%.0f"|format(b.remaining) }} left</span>
+                    <a href="/budget/delete/{{ b.id }}" style="color:#ff5252;text-decoration:none;">Delete</a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color:#b0bec5;text-align:center;padding:30px 0;">
+                No budgets set for this month yet.
+            </p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Bills & EMI | Fund Master{% endblock %}
+
+{% block content %}
+<h1 class="dashboard-title">Bills & EMI Reminders</h1>
+
+<div class="income-container">
+
+    <!-- ADD BILL -->
+    <div class="income-card glow-blue">
+        <h3>Add Bill / EMI</h3>
+        <form method="POST">
+            <input type="text" name="title" placeholder="Bill Name (e.g. Electricity)" required>
+            <input type="number" name="amount" placeholder="Amount (Rs.)" step="0.01" required>
+            <input type="date" name="due_date" required>
+            <select name="category" style="width:100%;padding:12px;margin-bottom:12px;border-radius:10px;border:none;background:#0d1b22;color:white;font-size:14px;">
+                <option value="Bill">Bill</option>
+                <option value="EMI">EMI</option>
+                <option value="Subscription">Subscription</option>
+                <option value="Insurance">Insurance</option>
+                <option value="Other">Other</option>
+            </select>
+            <button type="submit">Add Reminder</button>
+        </form>
+    </div>
+
+    <!-- BILLS LIST -->
+    <div class="income-card glow-red" style="overflow-y:auto;">
+        <h3>Upcoming & Overdue</h3>
+
+        <!-- Overdue -->
+        {% if overdue %}
+        <div style="margin-bottom:16px;">
+            <p style="color:#ff5252; font-size:13px; font-weight:600; margin-bottom:10px;">
+                ⚠ Overdue ({{ overdue|length }})
+            </p>
+            {% for b in overdue %}
+            <div style="background:rgba(255,82,82,0.12); border:1px solid rgba(255,82,82,0.3);
+                border-radius:12px; padding:12px 16px; margin-bottom:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <p style="font-weight:600; color:#e2e8f0;">{{ b.title }}</p>
+                        <p style="font-size:12px; color:#ff5252;">Due: {{ b.due_date }} | {{ b.category }}</p>
+                    </div>
+                    <div style="text-align:right;">
+                        <p style="font-weight:bold; color:#ff5252;">Rs. {{ "%.0f"|format(b.amount) }}</p>
+                        <a href="/bills/paid/{{ b.id }}" style="font-size:12px; color:#00ffa6; text-decoration:none; margin-right:8px;">Mark Paid</a>
+                        <a href="/bills/delete/{{ b.id }}" style="font-size:12px; color:#ff5252; text-decoration:none;">Delete</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Upcoming -->
+        {% if upcoming %}
+        <p style="color:#00f2ff; font-size:13px; font-weight:600; margin-bottom:10px;">
+            Upcoming ({{ upcoming|length }})
+        </p>
+        {% for b in upcoming %}
+        <div style="background:rgba(0,242,255,0.07); border:1px solid rgba(0,242,255,0.2);
+            border-radius:12px; padding:12px 16px; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <p style="font-weight:600; color:#e2e8f0;">{{ b.title }}</p>
+                    <p style="font-size:12px; color:#b0bec5;">Due: {{ b.due_date }} | {{ b.category }}</p>
+                </div>
+                <div style="text-align:right;">
+                    <p style="font-weight:bold; color:#00f2ff;">Rs. {{ "%.0f"|format(b.amount) }}</p>
+                    <a href="/bills/paid/{{ b.id }}" style="font-size:12px; color:#00ffa6; text-decoration:none; margin-right:8px;">Mark Paid</a>
+                    <a href="/bills/delete/{{ b.id }}" style="font-size:12px; color:#ff5252; text-decoration:none;">Delete</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Paid -->
+        {% if paid %}
+        <p style="color:#00ffa6; font-size:13px; font-weight:600; margin:16px 0 10px;">
+            ✓ Paid ({{ paid|length }})
+        </p>
+        {% for b in paid %}
+        <div style="background:rgba(0,255,166,0.07); border:1px solid rgba(0,255,166,0.15);
+            border-radius:12px; padding:10px 16px; margin-bottom:8px; opacity:0.7;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <p style="font-weight:600; color:#b0bec5; text-decoration:line-through;">{{ b.title }}</p>
+                    <p style="font-size:12px; color:#b0bec5;">{{ b.due_date }} | {{ b.category }}</p>
+                </div>
+                <div style="text-align:right;">
+                    <p style="color:#00ffa6;">Rs. {{ "%.0f"|format(b.amount) }}</p>
+                    <a href="/bills/delete/{{ b.id }}" style="font-size:12px; color:#ff5252; text-decoration:none;">Delete</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% if not overdue and not upcoming and not paid %}
+        <p style="color:#b0bec5; text-align:center; padding:30px 0;">No bills added yet.</p>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

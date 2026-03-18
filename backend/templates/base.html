@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Fund Master{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="dashboard-bg">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <h2 class="logo">Fund Master</h2>
+    <nav class="sidebar-menu">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/income">Income</a>
+        <a href="/expense">Expense</a>
+        <a href="/asset">Assets</a>
+        <a href="/analysis">Analysis</a>
+        <a href="/budget">Budget</a>
+        <a href="/bills">Bills & EMI</a>
+        <a href="/savings">Savings Goals</a>
+        <a href="/settings">Settings</a>
+    </nav>
+    <a href="/logout" class="logout-btn" style="position:static;margin-top:20px;display:block;">Logout</a>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="dashboard-main">
+    {% block content %}{% endblock %}
+</div>
+
+<!-- ========== AI VOICE CHAT WIDGET ========== -->
+
+<!-- Floating Button -->
+<button id="fm-chat-toggle" onclick="toggleFMChat()" title="AI Voice Financial Advisor">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+</button>
+
+<!-- Chat Panel -->
+<div id="fm-chat-panel">
+    <div id="fm-chat-header">
+        <div class="fm-online-dot"></div>
+        <span>AI Voice Advisor</span>
+        <div id="fm-voice-status"></div>
+        <button onclick="toggleFMChat()" id="fm-close-btn">✕</button>
+    </div>
+
+    <div id="fm-chat-messages"></div>
+    <div id="fm-disclaimer">Tap mic to speak or type your question</div>
+
+    <!-- Quick Chips -->
+    <div id="fm-quick-btns">
+        <button class="fm-quick" onclick="fmQuick('What is my current balance?')">Balance</button>
+        <button class="fm-quick" onclick="fmQuick('Where am I spending the most?')">Top expenses</button>
+        <button class="fm-quick" onclick="fmQuick('How are my assets?')">Assets</button>
+    </div>
+
+    <!-- Input Row with Mic -->
+    <div id="fm-input-row">
+        <button id="fm-mic-btn" onclick="toggleVoice()" title="Click to speak">
+            <svg id="fm-mic-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" y1="19" x2="12" y2="23"/>
+                <line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+        </button>
+        <textarea id="fm-input" placeholder="Speak or type your question…"
+            onkeydown="fmHandleKey(event)" oninput="fmResize(this)" rows="1"></textarea>
+        <button id="fm-send-btn" onclick="fmSend()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Voice Toggle -->
+    <div id="fm-tts-row">
+        <label style="font-size:11px;color:rgba(0,242,255,0.6);display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="checkbox" id="fm-tts-toggle" checked
+                style="accent-color:#00f2ff;width:13px;height:13px;">
+            Read replies aloud
+        </label>
+    </div>
+</div>
+
+<style>
+#fm-chat-toggle {
+    position:fixed;bottom:28px;right:28px;z-index:9999;
+    width:54px;height:54px;border-radius:50%;
+    background:linear-gradient(135deg,#00f2ff,#00c6ff);
+    color:#002b36;border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 25px rgba(0,242,255,0.6),0 0 50px rgba(0,242,255,0.3);
+    transition:transform 0.2s,box-shadow 0.2s;
+}
+#fm-chat-toggle:hover{transform:scale(1.08);box-shadow:0 0 35px rgba(0,242,255,0.9);}
+
+#fm-chat-panel {
+    display:none;flex-direction:column;position:fixed;
+    bottom:92px;right:28px;z-index:9998;
+    width:370px;height:540px;border-radius:18px;overflow:hidden;
+    background:rgba(10,20,28,0.97);backdrop-filter:blur(18px);
+    border:1px solid rgba(0,242,255,0.25);
+    box-shadow:0 0 40px rgba(0,242,255,0.3),0 20px 60px rgba(0,0,0,0.6);
+    font-family:"Segoe UI",sans-serif;
+    animation:fmSlideUp 0.3s ease;
+}
+@keyframes fmSlideUp {
+    from{opacity:0;transform:translateY(20px) scale(0.97);}
+    to{opacity:1;transform:translateY(0) scale(1);}
+}
+#fm-chat-header {
+    padding:14px 16px;background:rgba(0,242,255,0.1);
+    border-bottom:1px solid rgba(0,242,255,0.2);
+    display:flex;align-items:center;gap:10px;
+    color:#00f2ff;font-size:14px;font-weight:600;
+    text-shadow:0 0 10px rgba(0,242,255,0.7);
+}
+.fm-online-dot{width:8px;height:8px;border-radius:50%;background:#00ffa6;box-shadow:0 0 8px rgba(0,255,166,0.8);flex-shrink:0;}
+#fm-voice-status{font-size:11px;color:rgba(0,242,255,0.7);margin-left:4px;}
+#fm-close-btn{margin-left:auto;background:none;border:none;cursor:pointer;color:rgba(0,242,255,0.6);font-size:16px;}
+#fm-close-btn:hover{color:#ff6b6b;}
+
+#fm-chat-messages{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:12px;}
+.fm-msg-row{display:flex;gap:8px;align-items:flex-start;}
+.fm-msg-row.fm-user{flex-direction:row-reverse;}
+.fm-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;margin-top:2px;}
+.fm-ai-av{background:rgba(0,242,255,0.15);color:#00f2ff;border:1px solid rgba(0,242,255,0.3);}
+.fm-usr-av{background:rgba(0,255,166,0.15);color:#00ffa6;border:1px solid rgba(0,255,166,0.3);}
+.fm-bubble{max-width:76%;padding:9px 13px;font-size:13px;line-height:1.55;color:#e2e8f0;}
+.fm-ai-bubble{background:rgba(255,255,255,0.07);border:1px solid rgba(0,242,255,0.15);border-radius:4px 14px 14px 14px;}
+.fm-usr-bubble{background:rgba(0,242,255,0.15);border:1px solid rgba(0,242,255,0.3);border-radius:14px 4px 14px 14px;color:#00f2ff;}
+.fm-typing{display:flex;gap:5px;align-items:center;padding:10px 13px;}
+.fm-dot{width:6px;height:6px;border-radius:50%;background:rgba(0,242,255,0.6);animation:fmBlink 1.2s infinite;}
+.fm-dot:nth-child(2){animation-delay:.2s}.fm-dot:nth-child(3){animation-delay:.4s}
+@keyframes fmBlink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+
+#fm-disclaimer{font-size:11px;color:rgba(176,190,197,0.5);text-align:center;padding:4px 12px;border-top:1px solid rgba(255,255,255,0.05);}
+#fm-quick-btns{display:flex;gap:6px;padding:6px 12px;flex-wrap:wrap;}
+.fm-quick{padding:5px 11px;border-radius:20px;border:1px solid rgba(0,242,255,0.25);background:rgba(0,242,255,0.07);color:rgba(0,242,255,0.8);font-size:11px;cursor:pointer;transition:all 0.2s;font-family:"Segoe UI",sans-serif;}
+.fm-quick:hover{background:rgba(0,242,255,0.18);color:#00f2ff;}
+
+#fm-input-row{padding:8px 14px;border-top:1px solid rgba(0,242,255,0.15);display:flex;gap:8px;align-items:flex-end;}
+
+#fm-mic-btn {
+    width:36px;height:36px;border-radius:50%;flex-shrink:0;
+    background:rgba(0,242,255,0.1);
+    color:#00f2ff;border:1px solid rgba(0,242,255,0.3);
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:all 0.2s;
+}
+#fm-mic-btn:hover{background:rgba(0,242,255,0.2);}
+#fm-mic-btn.listening{
+    background:rgba(255,82,82,0.2);
+    border-color:rgba(255,82,82,0.6);
+    color:#ff5252;
+    animation:micPulse 1s infinite;
+}
+@keyframes micPulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(255,82,82,0.4);}
+    50%{box-shadow:0 0 0 8px rgba(255,82,82,0);}
+}
+
+#fm-input{flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(0,242,255,0.2);border-radius:10px;padding:8px 12px;color:#e2e8f0;font-size:13px;font-family:"Segoe UI",sans-serif;resize:none;min-height:36px;max-height:90px;outline:none;line-height:1.5;}
+#fm-input::placeholder{color:rgba(176,190,197,0.5);}
+#fm-input:focus{border-color:rgba(0,242,255,0.5);box-shadow:0 0 12px rgba(0,242,255,0.3);}
+#fm-send-btn{width:36px;height:36px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#00f2ff,#00c6ff);color:#002b36;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 0 15px rgba(0,242,255,0.5);transition:transform 0.2s;}
+#fm-send-btn:hover{transform:scale(1.08);}
+
+#fm-tts-row{padding:6px 16px 10px;display:flex;align-items:center;}
+</style>
+
+<script>
+let fmHistory = [], fmTyping = false;
+let recognition = null, isListening = false;
+
+function toggleFMChat() {
+    const panel = document.getElementById('fm-chat-panel');
+    const open  = panel.style.display === 'flex';
+    panel.style.display = open ? 'none' : 'flex';
+    if (!open && fmHistory.length === 0) fmGreet();
+}
+
+function fmGreet() {
+    fmAppend('ai', "Hi! I'm your AI Voice Advisor. Tap the 🎤 mic button to speak, or type your question below.");
+}
+
+function fmAppend(role, text) {
+    const box    = document.getElementById('fm-chat-messages');
+    const isUser = role === 'user';
+    const row    = document.createElement('div');
+    row.className = 'fm-msg-row' + (isUser ? ' fm-user' : '');
+    const av = document.createElement('div');
+    av.className  = 'fm-avatar ' + (isUser ? 'fm-usr-av' : 'fm-ai-av');
+    av.textContent = isUser ? 'You' : 'AI';
+    const bubble = document.createElement('div');
+    bubble.className = 'fm-bubble ' + (isUser ? 'fm-usr-bubble' : 'fm-ai-bubble');
+    bubble.innerHTML = text.replace(/\n/g, '<br>');
+    row.appendChild(av); row.appendChild(bubble);
+    box.appendChild(row); box.scrollTop = box.scrollHeight;
+}
+
+function fmShowTyping() {
+    const box = document.getElementById('fm-chat-messages');
+    const row = document.createElement('div');
+    row.className = 'fm-msg-row'; row.id = 'fm-typing-row';
+    row.innerHTML = '<div class="fm-avatar fm-ai-av">AI</div><div class="fm-bubble fm-ai-bubble fm-typing"><div class="fm-dot"></div><div class="fm-dot"></div><div class="fm-dot"></div></div>';
+    box.appendChild(row); box.scrollTop = box.scrollHeight;
+}
+function fmRemoveTyping() { const t = document.getElementById('fm-typing-row'); if(t) t.remove(); }
+function fmResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,90)+'px'; }
+function fmHandleKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();fmSend();} }
+function fmQuick(text) { document.getElementById('fm-input').value=text; fmSend(); }
+
+// ── Voice Input (Speech to Text) ─────────────────────────
+function toggleVoice() {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert('Your browser does not support voice input. Please use Chrome.');
+        return;
+    }
+
+    if (isListening) {
+        recognition.stop();
+        return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-IN';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+        isListening = true;
+        document.getElementById('fm-mic-btn').classList.add('listening');
+        document.getElementById('fm-voice-status').textContent = '🔴 Listening...';
+        document.getElementById('fm-input').placeholder = 'Listening... speak now';
+    };
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('fm-input').value = transcript;
+        fmSend();
+    };
+
+    recognition.onerror = (event) => {
+        console.log('Speech error:', event.error);
+        stopListening();
+    };
+
+    recognition.onend = () => { stopListening(); };
+
+    recognition.start();
+}
+
+function stopListening() {
+    isListening = false;
+    document.getElementById('fm-mic-btn').classList.remove('listening');
+    document.getElementById('fm-voice-status').textContent = '';
+    document.getElementById('fm-input').placeholder = 'Speak or type your question…';
+}
+
+// ── Voice Output (Text to Speech) ────────────────────────
+function speakReply(text) {
+    const ttsEnabled = document.getElementById('fm-tts-toggle').checked;
+    if (!ttsEnabled) return;
+    if (!('speechSynthesis' in window)) return;
+
+    window.speechSynthesis.cancel();
+    const clean = text.replace(/<[^>]*>/g, '').replace(/Rs\./g, 'Rupees');
+    const utterance = new SpeechSynthesisUtterance(clean);
+    utterance.lang  = 'en-IN';
+    utterance.rate  = 1.0;
+    utterance.pitch = 1.0;
+
+    const voices = window.speechSynthesis.getVoices();
+    const preferred = voices.find(v => v.lang === 'en-IN') || voices.find(v => v.lang.startsWith('en'));
+    if (preferred) utterance.voice = preferred;
+
+    window.speechSynthesis.speak(utterance);
+}
+
+// ── Send Message ──────────────────────────────────────────
+async function fmSend() {
+    if (fmTyping) return;
+    const input = document.getElementById('fm-input');
+    const text  = input.value.trim();
+    if (!text) return;
+
+    input.value = ''; input.style.height = 'auto';
+    fmAppend('user', text);
+    fmHistory.push({ role: 'user', content: text });
+    fmTyping = true; fmShowTyping();
+
+    try {
+        const res  = await fetch('/api/ai-chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages: fmHistory })
+        });
+        const data = await res.json();
+        const reply = data.reply || 'Sorry, something went wrong.';
+        fmHistory.push({ role: 'assistant', content: reply });
+        fmRemoveTyping();
+        fmAppend('ai', reply);
+        speakReply(reply);   // 🔊 speak the reply
+    } catch(e) {
+        fmRemoveTyping();
+        fmAppend('ai', 'Could not connect. Please try again.');
+    }
+    fmTyping = false;
+}
+
+// Load voices when ready
+window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
+</script>
+<!-- ========== END AI VOICE CHAT WIDGET ========== -->
+
+</body>
+</html>

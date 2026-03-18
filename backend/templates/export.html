@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Export Report | Fund Master{% endblock %}
+
+{% block content %}
+<h1 class="dashboard-title">Export Financial Statement</h1>
+
+<div style="max-width: 520px; margin-top: 20px;">
+
+    <div class="income-card glow-blue">
+        <h3 style="margin-bottom: 20px;">Select Date Range</h3>
+
+        {% if error %}
+        <div style="background: rgba(255,82,82,0.15); border: 1px solid rgba(255,82,82,0.4);
+            color: #ff6b6b; padding: 10px 14px; border-radius: 10px; margin-bottom: 16px; font-size: 14px;">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/export/pdf">
+
+            <label style="display:block; font-size:13px; color:#b0bec5; margin-bottom:6px;">
+                From Date
+            </label>
+            <input type="date" name="from_date" required
+                style="width:100%; padding:12px; margin-bottom:16px; border-radius:10px;
+                    border:none; background:#0d1b22; color:white; font-size:14px;">
+
+            <label style="display:block; font-size:13px; color:#b0bec5; margin-bottom:6px;">
+                To Date
+            </label>
+            <input type="date" name="to_date" required
+                style="width:100%; padding:12px; margin-bottom:24px; border-radius:10px;
+                    border:none; background:#0d1b22; color:white; font-size:14px;">
+
+            <button type="submit" style="width:100%; padding:13px; border-radius:12px; border:none;
+                background: linear-gradient(135deg, #00f2ff, #00c6ff);
+                color:#002b36; font-weight:bold; font-size:15px; cursor:pointer;
+                box-shadow: 0 0 25px rgba(0,242,255,0.5);
+                transition: transform 0.2s, box-shadow 0.2s;"
+                onmouseover="this.style.transform='translateY(-2px)'"
+                onmouseout="this.style.transform='translateY(0)'">
+                Download PDF Report
+            </button>
+
+        </form>
+    </div>
+
+    <div style="margin-top: 16px; font-size: 13px; color: #b0bec5; padding: 0 4px;">
+        The PDF will include all income, expenses, assets, and a financial summary
+        for the selected date range.
+    </div>
+
+</div>
+{% endblock %}

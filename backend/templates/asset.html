@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Assets | Fund Master{% endblock %}
+
+{% block content %}
+<h1 class="dashboard-title">Assets</h1>
+
+<div class="income-container">
+
+    <!-- ADD ASSET -->
+    <div class="income-card glow-green">
+        <h3>Add Asset</h3>
+
+        <form method="POST">
+            <input type="text" name="name" placeholder="Asset Name" required>
+            <input type="number" name="value" placeholder="Asset Value (₹)" required>
+            <button type="submit">Add Asset</button>
+        </form>
+    </div>
+
+    <!-- ASSET LIST -->
+    <div class="income-card glow-blue">
+        <h3>Asset Records</h3>
+
+        <table class="income-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if assets %}
+                    {% for a in assets %}
+                    <tr>
+                        <td>{{ a.name }}</td>
+                        <td>₹ {{ a.value }}</td>
+                        <td>
+                            <a href="/asset/delete/{{ a.id }}"
+                               style="color:#ff5252; text-decoration:none;">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="3" style="text-align:center;">
+                            No assets added
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

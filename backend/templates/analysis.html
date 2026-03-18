@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+{% block title %}Analysis | Fund Master{% endblock %}
+
+{% block content %}
+<h1 class="dashboard-title">Analysis</h1>
+
+<!-- Summary Cards -->
+<div class="card-grid" style="margin-bottom: 30px;">
+    <div class="dash-card glow-green">
+        <h3>Total Income</h3>
+        <p>Rs. {{ "{:,.2f}".format(total_income) }}</p>
+    </div>
+    <div class="dash-card glow-red">
+        <h3>Total Expense</h3>
+        <p>Rs. {{ "{:,.2f}".format(total_expense) }}</p>
+    </div>
+    <div class="dash-card glow-blue">
+        <h3>Net Balance</h3>
+        <p>Rs. {{ "{:,.2f}".format(total_balance) }}</p>
+    </div>
+    <div class="dash-card glow-purple">
+        <h3>Savings Rate</h3>
+        <p>{{ savings_rate }}%</p>
+    </div>
+</div>
+
+<!-- Charts Grid -->
+<div class="analysis-grid">
+
+    <!-- Expense by Category - Doughnut -->
+    <div class="analysis-card glow-red">
+        <h3>Expense by Category</h3>
+        {% if category_labels %}
+            <canvas id="categoryChart"></canvas>
+        {% else %}
+            <p class="no-data">No expense data available</p>
+        {% endif %}
+    </div>
+
+    <!-- Income by Source - Bar -->
+    <div class="analysis-card glow-green">
+        <h3>Income by Source</h3>
+        {% if source_labels %}
+            <canvas id="sourceChart"></canvas>
+        {% else %}
+            <p class="no-data">No income data available</p>
+        {% endif %}
+    </div>
+
+    <!-- Monthly Expense Trend - Line -->
+    <div class="analysis-card glow-blue" style="grid-column: 1 / -1;">
+        <h3>Monthly Expense Trend</h3>
+        {% if monthly_labels %}
+            <canvas id="trendChart"></canvas>
+        {% else %}
+            <p class="no-data">No monthly data available</p>
+        {% endif %}
+    </div>
+
+    <!-- Income vs Expense - Bar -->
+    <div class="analysis-card glow-purple" style="grid-column: 1 / -1;">
+        <h3>Income vs Expense Overview</h3>
+        <canvas id="overviewChart"></canvas>
+    </div>
+
+</div>
+
+<style>
+.analysis-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px;
+    margin-top: 10px;
+}
+
+.analysis-card {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(14px);
+    border-radius: 18px;
+    padding: 25px;
+    transition: transform 0.3s;
+}
+
+.analysis-card:hover {
+    transform: translateY(-4px);
+}
+
+.analysis-card h3 {
+    color: #00f2ff;
+    margin-bottom: 20px;
+    font-size: 16px;
+    text-shadow: 0 0 10px rgba(0,242,255,0.5);
+}
+
+.no-data {
+    color: #b0bec5;
+    text-align: center;
+    padding: 40px 0;
+    font-size: 14px;
+}
+
+canvas {
+    max-height: 280px;
+}
+</style>
+
+<script>
+const chartDefaults = {
+    color: '#b0bec5',
+    plugins: {
+        legend: {
+            labels: { color: '#b0bec5', font: { size: 12 } }
+        }
+    }
+};
+
+// 1. Expense by Category — Doughnut
+{% if category_labels %}
+new Chart(document.getElementById('categoryChart'), {
+    type: 'doughnut',
+    data: {
+        labels: {{ category_labels | tojson }},
+        datasets: [{
+            data: {{ category_values | tojson }},
+            backgroundColor: [
+                'rgba(255,90,90,0.8)',
+                'rgba(0,242,255,0.8)',
+                'rgba(0,255,166,0.8)',
+                'rgba(180,120,255,0.8)',
+                'rgba(255,200,80,0.8)',
+                'rgba(80,180,255,0.8)',
+                'rgba(255,140,80,0.8)'
+            ],
+            borderColor: 'rgba(255,255,255,0.1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        ...chartDefaults,
+        cutout: '65%'
+    }
+});
+{% endif %}
+
+// 2. Income by Source — Bar
+{% if source_labels %}
+new Chart(document.getElementById('sourceChart'), {
+    type: 'bar',
+    data: {
+        labels: {{ source_labels | tojson }},
+        datasets: [{
+            label: 'Income (Rs.)',
+            data: {{ source_values | tojson }},
+            backgroundColor: 'rgba(0,255,166,0.6)',
+            borderColor: 'rgba(0,255,166,1)',
+            borderWidth: 1,
+            borderRadius: 8
+        }]
+    },
+    options: {
+        ...chartDefaults,
+        scales: {
+            x: { ticks: { color: '#b0bec5' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { ticks: { color: '#b0bec5' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+        }
+    }
+});
+{% endif %}
+
+// 3. Monthly Expense Trend — Line
+{% if monthly_labels %}
+new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+        labels: {{ monthly_labels | tojson }},
+        datasets: [{
+            label: 'Monthly Expense (Rs.)',
+            data: {{ monthly_values | tojson }},
+            borderColor: '#00f2ff',
+            backgroundColor: 'rgba(0,242,255,0.1)',
+            pointBackgroundColor: '#00f2ff',
+            pointRadius: 5,
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: {
+        ...chartDefaults,
+        scales: {
+            x: { ticks: { color: '#b0bec5' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { ticks: { color: '#b0bec5' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+        }
+    }
+});
+{% endif %}
+
+// 4. Income vs Expense Overview — Bar
+new Chart(document.getElementById('overviewChart'), {
+    type: 'bar',
+    data: {
+        labels: ['Total Income', 'Total Expense', 'Net Balance'],
+        datasets: [{
+            label: 'Amount (Rs.)',
+            data: [{{ total_income }}, {{ total_expense }}, {{ total_balance }}],
+            backgroundColor: [
+                'rgba(0,255,166,0.7)',
+                'rgba(255,90,90,0.7)',
+                'rgba(0,242,255,0.7)'
+            ],
+            borderColor: [
+                'rgba(0,255,166,1)',
+                'rgba(255,90,90,1)',
+                'rgba(0,242,255,1)'
+            ],
+            borderWidth: 1,
+            borderRadius: 10
+        }]
+    },
+    options: {
+        ...chartDefaults,
+        scales: {
+            x: { ticks: { color: '#b0bec5' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { ticks: { color: '#b0bec5' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+        }
+    }
+});
+</script>
+
+{% endblock %}

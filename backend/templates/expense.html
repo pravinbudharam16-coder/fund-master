@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Expense | Fund Master{% endblock %}
+
+{% block content %}
+<h1 class="dashboard-title">Expense</h1>
+
+<div class="income-container">
+
+    <!-- ADD EXPENSE CARD -->
+    <div class="income-card glow-red">
+        <h3>Add Expense</h3>
+
+        <form method="POST">
+            <input type="text" name="title" placeholder="Expense Title" required>
+            <input type="number" name="amount" placeholder="Amount (₹)" required>
+            <input type="text" name="category" placeholder="Category" required>
+            <input type="date" name="date" required>
+
+            <button type="submit">Add Expense</button>
+        </form>
+    </div>
+
+    <!-- EXPENSE RECORDS -->
+    <div class="income-card glow-orange">
+        <h3>Expense Records</h3>
+
+        <table class="income-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Amount</th>
+                    <th>Category</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            {% if report %}
+                {% for row in report %}
+                <tr>
+                    <td>{{ row.title }}</td>
+                    <td>₹ {{ row.amount }}</td>
+                    <td>{{ row.category }}</td>
+                    <td>{{ row.date }}</td>
+                    <td>
+                        <a href="/expense/delete/{{ row.id }}"
+                           class="delete-link">
+                           Delete
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="5" class="empty">
+                        No expense records
+                    </td>
+                </tr>
+            {% endif %}
+
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

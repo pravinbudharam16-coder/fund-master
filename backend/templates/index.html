@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fund Master Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="card">
+    <h1>💰 Fund Master</h1>
+
+    <button onclick="getPrediction()">Get Prediction</button>
+
+    <p>Income: <span id="income">-</span></p>
+    <p>Expense: <span id="expense">-</span></p>
+    <p>Savings: <span id="savings">-</span></p>
+
+    <canvas id="financeChart"></canvas>
+</div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>

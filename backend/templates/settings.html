@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Settings | Fund Master{% endblock %}
+
+{% block content %}
+<h1 class="dashboard-title">Settings</h1>
+
+{% if message %}
+<div class="fm-alert fm-alert-success">{{ message }}</div>
+{% endif %}
+
+{% if error %}
+<div class="fm-alert fm-alert-error">{{ error }}</div>
+{% endif %}
+
+<div class="settings-container">
+
+    <!-- Update Profile -->
+    <div class="income-card glow-blue">
+        <h3>Update Profile</h3>
+        <form method="POST">
+            <input type="hidden" name="action" value="update_profile">
+            <label>Username</label>
+            <input type="text" name="username" value="{{ user.username }}" required>
+            <label>Email</label>
+            <input type="email" name="email" value="{{ user.email }}" required>
+            <button type="submit">Save Changes</button>
+        </form>
+    </div>
+
+    <!-- Change Password -->
+    <div class="income-card glow-red">
+        <h3>Change Password</h3>
+        <form method="POST">
+            <input type="hidden" name="action" value="change_password">
+            <label>Current Password</label>
+            <input type="password" name="current_password" placeholder="Enter current password" required>
+            <label>New Password</label>
+            <input type="password" name="new_password" placeholder="Enter new password" required>
+            <label>Confirm New Password</label>
+            <input type="password" name="confirm_password" placeholder="Confirm new password" required>
+            <button type="submit" class="btn-red">Change Password</button>
+        </form>
+    </div>
+
+    <!-- Account Info -->
+    <div class="income-card glow-purple" style="grid-column: 1 / -1;">
+        <h3>Account Info</h3>
+        <table class="income-table">
+            <tr>
+                <td style="color:#b0bec5; width:180px;">Username</td>
+                <td>{{ user.username }}</td>
+            </tr>
+            <tr>
+                <td style="color:#b0bec5;">Email</td>
+                <td>{{ user.email }}</td>
+            </tr>
+            <tr>
+                <td style="color:#b0bec5;">Account ID</td>
+                <td>#{{ user.id }}</td>
+            </tr>
+        </table>
+    </div>
+
+</div>
+
+<style>
+.settings-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px;
+    margin-top: 10px;
+}
+
+.income-card label {
+    display: block;
+    font-size: 13px;
+    color: #b0bec5;
+    margin-bottom: 5px;
+    margin-top: 4px;
+}
+
+.income-card input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    border: none;
+    background: #0d1b22;
+    color: white;
+    font-size: 14px;
+}
+
+.income-card input:focus {
+    outline: 1px solid rgba(0,242,255,0.4);
+}
+
+.btn-red {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(90deg, #ff5252, #ff1744);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-red:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(255,82,82,0.8);
+}
+
+.fm-alert {
+    padding: 12px 18px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.fm-alert-success {
+    background: rgba(0,255,166,0.15);
+    border: 1px solid rgba(0,255,166,0.4);
+    color: #00ffa6;
+}
+
+.fm-alert-error {
+    background: rgba(255,82,82,0.15);
+    border: 1px solid rgba(255,82,82,0.4);
+    color: #ff6b6b;
+}
+
+.glow-purple { box-shadow: 0 0 28px rgba(180,120,255,0.45); }
+</style>
+
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Income | Fund Master{% endblock %}
+
+{% block content %}
+<h1 class="dashboard-title">Income</h1>
+
+<div class="income-container">
+
+    <!-- ADD INCOME CARD -->
+    <div class="income-card glow-green">
+        <h3>Add Income</h3>
+
+        <form method="POST">
+            <input type="text" name="source" placeholder="Income Source" required>
+            <input type="number" name="amount" placeholder="Amount (₹)" required>
+            <input type="date" name="date" required>
+
+            <button type="submit">Add Income</button>
+        </form>
+    </div>
+
+    <!-- INCOME LIST -->
+    <div class="income-card glow-blue">
+        <h3>Income Records</h3>
+
+        <table class="income-table">
+            <thead>
+                <tr>
+                    <th>Source</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+{% if report %}
+    {% for row in report %}
+    <tr>
+        <td>{{ row.source }}</td>
+        <td>₹ {{ row.amount }}</td>
+        <td>{{ row.date }}</td>
+        <td>
+            <a href="/income/delete/{{ row.id }}"
+               style="color:#ff5252; text-decoration:none;">
+               Delete
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+{% else %}
+    <tr>
+        <td colspan="4" style="text-align:center;">No income records</td>
+    </tr>
+{% endif %}
+</tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

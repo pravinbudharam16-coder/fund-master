@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Savings Goals | Fund Master{% endblock %}
+
+{% block content %}
+<h1 class="dashboard-title">Savings Goals</h1>
+
+<div class="income-container">
+
+    <!-- ADD GOAL -->
+    <div class="income-card glow-green">
+        <h3>Add Savings Goal</h3>
+        <form method="POST" action="/savings">
+            <input type="text" name="title" placeholder="Goal Name (e.g. Buy Laptop)" required>
+            <input type="text" name="target_amount" placeholder="Target Amount (Rs.)" required>
+            <label style="font-size:13px;color:#b0bec5;display:block;margin-bottom:5px;">Deadline (optional)</label>
+            <input type="date" name="deadline"
+                style="width:100%;padding:12px;margin-bottom:12px;border-radius:10px;
+                border:none;background:#0d1b22;color:white;font-size:14px;">
+            <button type="submit">Add Goal</button>
+        </form>
+    </div>
+
+    <!-- GOALS LIST -->
+    <div class="income-card glow-blue">
+        <h3>Your Goals</h3>
+
+        {% if goals_data %}
+            {% for g in goals_data %}
+            <div style="margin-bottom:24px;background:rgba(255,255,255,0.04);
+                border-radius:14px;padding:16px;border:1px solid rgba(255,255,255,0.08);">
+
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                    <span style="font-weight:600;font-size:15px;color:#e2e8f0;">{{ g.title }}</span>
+                    {% if g.status == 'complete' %}
+                    <span style="background:rgba(0,255,166,0.2);color:#00ffa6;
+                        padding:3px 10px;border-radius:20px;font-size:12px;">Completed!</span>
+                    {% endif %}
+                </div>
+
+                <!-- Progress Bar -->
+                <div style="background:rgba(255,255,255,0.1);border-radius:20px;height:14px;overflow:hidden;margin-bottom:8px;">
+                    <div style="height:100%;border-radius:20px;width:{{ g.percent }}%;
+                        background:{% if g.status == 'complete' %}linear-gradient(90deg,#00ffa6,#00f2ff)
+                                   {% elif g.status == 'progress' %}linear-gradient(90deg,#00c6ff,#00f2ff)
+                                   {% else %}linear-gradient(90deg,#a78bfa,#818cf8){% endif %};
+                        transition:width 0.5s ease;">
+                    </div>
+                </div>
+
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px;">
+                    <span style="color:#00ffa6;">Rs. {{ "%.0f"|format(g.saved) }} saved</span>
+                    <span style="color:#b0bec5;">{{ g.percent }}%</span>
+                    <span style="color:#b0bec5;">Rs. {{ "%.0f"|format(g.remaining) }} to go</span>
+                </div>
+
+                <div style="font-size:12px;color:#b0bec5;margin-bottom:12px;">
+                    Target: Rs. {{ "%.0f"|format(g.target) }}
+                    {% if g.deadline %} | Deadline: {{ g.deadline }}{% endif %}
+                </div>
+
+                <!-- Add Money — separate route per goal -->
+                {% if g.status != 'complete' %}
+                <form method="POST" action="/savings/add/{{ g.id }}">
+                    <input type="text" name="amount" placeholder="Enter amount to add (Rs.)"
+                        style="width:100%;padding:10px 12px;border-radius:8px;border:none;
+                        background:#0d1b22;color:white;font-size:13px;margin-bottom:8px;">
+                    <button type="submit" style="width:100%;padding:10px;border-radius:8px;border:none;
+                        background:linear-gradient(90deg,#00ffa6,#00f2ff);
+                        color:#002b36;font-weight:bold;cursor:pointer;font-size:13px;">
+                        Add to Savings
+                    </button>
+                </form>
+                {% endif %}
+
+                <div style="text-align:right;margin-top:8px;">
+                    <a href="/savings/delete/{{ g.id }}"
+                        style="font-size:12px;color:#ff5252;text-decoration:none;">Delete Goal</a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color:#b0bec5;text-align:center;padding:30px 0;">
+                No savings goals yet. Add one to start tracking!
+            </p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

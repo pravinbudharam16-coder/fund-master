@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register | Fund Master</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-bg">
+
+<div class="auth-page">
+    <div class="auth-card">
+
+        <h2>Fund Master</h2>
+        <p class="subtitle">Create your account</p>
+
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+
+        <form method="POST" action="/register">
+
+            <label style="font-size:13px;color:#666;display:block;margin-bottom:4px;">
+                Username <span style="color:red;">*</span>
+            </label>
+            <input type="text" name="username" placeholder="Enter username" required>
+
+            <label style="font-size:13px;color:#666;display:block;margin-bottom:4px;margin-top:4px;">
+                Email Address <span style="color:red;">*</span>
+            </label>
+            <input type="email" name="email" placeholder="Enter your email (used for OTP)"
+                required style="border: 1.5px solid #243b55;">
+
+            <small style="display:block;color:#888;font-size:11px;margin:-8px 0 10px;">
+                📧 This email will be used to send OTP for password reset
+            </small>
+
+            <label style="font-size:13px;color:#666;display:block;margin-bottom:4px;">
+                Password <span style="color:red;">*</span>
+            </label>
+            <input type="password" name="password" placeholder="Enter password (min 6 chars)"
+                required minlength="6">
+
+            <button type="submit" style="margin-top:8px;">Create Account</button>
+        </form>
+
+        <p class="auth-link" style="text-align:center;margin-top:16px;font-size:14px;">
+            Already have an account?
+            <a href="/login" style="color:#243b55;font-weight:600;">Login</a>
+        </p>
+
+    </div>
+</div>
+
+</body>
+</html>
